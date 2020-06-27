@@ -7,9 +7,8 @@ import sprinklemoney.api.common.BaseController;
 import sprinklemoney.api.common.CustomResponse;
 import sprinklemoney.api.dto.CreateSprinkleRequest;
 import sprinklemoney.api.dto.SprinkleInfoResponse;
-import sprinklemoney.api.dto.SprinkleReceiveInfoResponse;
 import sprinklemoney.common.error.BaseException;
-import sprinklemoney.common.error.ErrorCode;
+import sprinklemoney.common.error.ErrorStatus;
 import sprinklemoney.domain.money.SprinkleService;
 import sprinklemoney.domain.money.dto.CreateReceiveParameters;
 import sprinklemoney.domain.money.dto.CreateSprinkleParameters;
@@ -46,7 +45,7 @@ public class SprinkleController extends BaseController {
         Sprinkle sprinkle = sprinkleService.getSprinkleWithReceives(token);
 
         if (!sprinkle.getAuthor().getKeyValue().equals(userId))
-            throw new BaseException(ErrorCode.NOT_EXIST_SPRINKLE);
+            throw new BaseException(ErrorStatus.NOT_EXIST_SPRINKLE);
 
         return success(SprinkleInfoResponse.builder().sprinkle(sprinkle).build());
     }

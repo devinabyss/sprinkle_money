@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import sprinklemoney.common.error.BaseException;
-import sprinklemoney.common.error.ErrorCode;
+import sprinklemoney.common.error.ErrorStatus;
 import sprinklemoney.domain.money.dto.CreateReceiveParameters;
 import sprinklemoney.domain.money.dto.CreateSprinkleParameters;
 import sprinklemoney.domain.money.entity.Sprinkle;
@@ -53,8 +53,6 @@ public class SprinkleServiceImpl implements SprinkleService {
 
         SprinkleToken token = sprinkleTokenService.generateSprinkleToken();
 
-        log.info("## Generated : {}", token);
-
         Sprinkle sprinkle = Sprinkle.builder()
                 .author(author)
                 .token(token)
@@ -62,8 +60,6 @@ public class SprinkleServiceImpl implements SprinkleService {
                 .divideSize(parameters.getDivideSize())
                 .roomId(parameters.getRoomId())
                 .build();
-
-        log.info("## Selected : {}", token);
 
         token.setStatus(SprinkleToken.Status.LINKED);
 
@@ -76,7 +72,7 @@ public class SprinkleServiceImpl implements SprinkleService {
     @Transactional(readOnly = true)
     public Sprinkle getSprinkleWithReceives(String tokenValue) {
         Optional<Sprinkle> optional = getSprinkle(tokenValue);
-        Sprinkle sprinkle = optional.orElseThrow(() -> new BaseException(ErrorCode.NOT_EXIST_SPRINKLE));
+        Sprinkle sprinkle = optional.orElseThrow(() -> new BaseException(ErrorStatus.NOT_EXIST_SPRINKLE));
         List<SprinkleReceive> receiveList = sprinkle.getSprinkleReceives();
         log.info("# List : {}", receiveList);
 
@@ -89,7 +85,7 @@ public class SprinkleServiceImpl implements SprinkleService {
     public Optional<Sprinkle> getSprinkle(String tokenValue) {
         Optional<SprinkleToken> tokenOptional = sprinkleTokenService.getSprinkleToken(tokenValue);
         if (tokenOptional.isEmpty())
-            throw new BaseException(ErrorCode.INVALID_SPRINKLE_TOKEN_VALUE);
+            throw new BaseException(ErrorStatus.INVALID_SPRINKLE_TOKEN_VALUE);
 
         return sprinkleRepository.findByToken(tokenOptional.get());
     }
@@ -102,14 +98,14 @@ public class SprinkleServiceImpl implements SprinkleService {
 
         Optional<SprinkleToken> tokenOptional = sprinkleTokenService.getSprinkleToken(parameters.getToken());
         if (tokenOptional.isEmpty())
-            throw new BaseException(ErrorCode.INVALID_SPRINKLE_TOKEN_VALUE);
+            throw new BaseException(ErrorStatus.INVALID_SPRINKLE_TOKEN_VALUE);
 
         SprinkleToken token = tokenOptional.get();
 
         Optional<Sprinkle> sprinkleOptional = sprinkleRepository.findByToken(token);
 
         if (sprinkleOptional.isEmpty())
-            throw new BaseException(ErrorCode.NOT_EXIST_SPRINKLE);
+            throw new BaseException(ErrorStatus.NOT_EXIST_SPRINKLE);
 
         Sprinkle sprinkle = sprinkleOptional.get();
 

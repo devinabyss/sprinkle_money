@@ -10,6 +10,4 @@ import java.util.Optional;
 public interface SprinkleTokenRepository extends JpaRepository<SprinkleToken, Long> {
 
     Optional<SprinkleToken> findByValue(String value);
-
-    Optional<SprinkleToken> findByValueAndStatus(String value, SprinkleToken.Status status);
 }

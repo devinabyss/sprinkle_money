@@ -4,9 +4,6 @@ import java.security.SecureRandom;
 
 public class StringHandleUtil {
 
-    private static final int CHARACTER_BOUNDARY_FROM = 33;
-    private static final int CHARACTER_BOUNDARY_TO = 126;
-
     private static final SecureRandom secureRandom = new SecureRandom();
 
     public static String generateUriSafeRandomString(int size) {

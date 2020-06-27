@@ -1,16 +1,24 @@
 package sprinklemoney.common.error;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
-@AllArgsConstructor
 public class BaseException extends RuntimeException {
-    private final int errorCode;
-    private final String message;
+    private final ErrorStatus errorStatus;
 
-    public BaseException(ErrorCode error){
-        this.errorCode = error.getErrorCode();
-        this.message = error.getMessage();
+    public BaseException() {
+        super(ErrorStatus.UNKNOWN.getMessage());
+        this.errorStatus = ErrorStatus.UNKNOWN;
+    }
+
+    public BaseException(ErrorStatus error) {
+        super(error.getMessage());
+        this.errorStatus = error;
+    }
+
+    public static class TokenKeyGenerationFailedException extends BaseException {
+        public TokenKeyGenerationFailedException() {
+            super(ErrorStatus.SPRINKLE_TOKEN_GENERATION_FAIL);
+        }
     }
 }
