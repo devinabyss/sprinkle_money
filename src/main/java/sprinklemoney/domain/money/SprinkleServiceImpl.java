@@ -9,8 +9,8 @@ import sprinklemoney.common.error.BaseException;
 import sprinklemoney.common.error.ErrorCode;
 import sprinklemoney.domain.money.dto.CreateReceiveParameters;
 import sprinklemoney.domain.money.dto.CreateSprinkleParameters;
-import sprinklemoney.domain.money.entity.SprinkleReceive;
 import sprinklemoney.domain.money.entity.Sprinkle;
+import sprinklemoney.domain.money.entity.SprinkleReceive;
 import sprinklemoney.domain.money.entity.SprinkleToken;
 import sprinklemoney.domain.money.repository.SprinkleReceiveRepository;
 import sprinklemoney.domain.money.repository.SprinkleRepository;
@@ -20,6 +20,7 @@ import sprinklemoney.domain.user.entity.User;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -47,7 +48,6 @@ public class SprinkleServiceImpl implements SprinkleService {
 
         User author = userService.getUserWithGenerateByKeyValue(parameters.getAuthorId());
 
-
         if (sprinkleRepository.findByAuthorAndCreatedAfter(author, LocalDateTime.now().minus(10, ChronoUnit.MINUTES)).size() > 0)
             throw new RuntimeException("Already Exist Effective Sprinkle");
 
@@ -73,6 +73,28 @@ public class SprinkleServiceImpl implements SprinkleService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public Sprinkle getSprinkleWithReceives(String tokenValue) {
+        Optional<Sprinkle> optional = getSprinkle(tokenValue);
+        Sprinkle sprinkle = optional.orElseThrow(() -> new BaseException(ErrorCode.NOT_EXIST_SPRINKLE));
+        List<SprinkleReceive> receiveList = sprinkle.getSprinkleReceives();
+        log.info("# List : {}", receiveList);
+
+        return sprinkle;
+    }
+
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<Sprinkle> getSprinkle(String tokenValue) {
+        Optional<SprinkleToken> tokenOptional = sprinkleTokenService.getSprinkleToken(tokenValue);
+        if (tokenOptional.isEmpty())
+            throw new BaseException(ErrorCode.INVALID_SPRINKLE_TOKEN_VALUE);
+
+        return sprinkleRepository.findByToken(tokenOptional.get());
+    }
+
+    @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public SprinkleReceive createReceive(CreateReceiveParameters parameters) {
 
@@ -90,13 +112,9 @@ public class SprinkleServiceImpl implements SprinkleService {
             throw new BaseException(ErrorCode.NOT_EXIST_SPRINKLE);
 
         Sprinkle sprinkle = sprinkleOptional.get();
-        sprinkle.getSprinkleReceives();
 
         SprinkleReceive sprinkleReceive = sprinkle.share(receiver, secureRandom, parameters.getRoomId());
 
         return sprinkleReceiveRepository.save(sprinkleReceive);
-
-
-
     }
 }
