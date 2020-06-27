@@ -12,7 +12,6 @@ import sprinklemoney.domain.common.util.StringHandleUtil;
 import sprinklemoney.domain.money.entity.SprinkleToken;
 import sprinklemoney.domain.money.repository.SprinkleTokenRepository;
 
-import java.util.List;
 import java.util.Optional;
 
 @Slf4j

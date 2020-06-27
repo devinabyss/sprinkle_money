@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import sprinklemoney.common.error.BaseException;
 import sprinklemoney.common.error.ErrorStatus;
@@ -49,7 +50,7 @@ public class SprinkleServiceImpl implements SprinkleService {
         User author = userService.getUserWithGenerateByKeyValue(parameters.getAuthorId());
 
         if (sprinkleRepository.findByAuthorAndCreatedAfter(author, LocalDateTime.now().minus(10, ChronoUnit.MINUTES)).size() > 0)
-            throw new RuntimeException("Already Exist Effective Sprinkle");
+            throw new BaseException(ErrorStatus.HAVE_AVAILABLE_SPRINKLE);
 
         SprinkleToken token = sprinkleTokenService.generateSprinkleToken();
 
@@ -74,7 +75,7 @@ public class SprinkleServiceImpl implements SprinkleService {
         Optional<Sprinkle> optional = getSprinkle(tokenValue);
         Sprinkle sprinkle = optional.orElseThrow(() -> new BaseException(ErrorStatus.NOT_EXIST_SPRINKLE));
         List<SprinkleReceive> receiveList = sprinkle.getSprinkleReceives();
-        log.info("# List : {}", receiveList);
+        log.error("# List : {}", receiveList);
 
         return sprinkle;
     }
@@ -91,14 +92,15 @@ public class SprinkleServiceImpl implements SprinkleService {
     }
 
     @Override
-    @Transactional(isolation = Isolation.READ_COMMITTED)
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public SprinkleReceive createReceive(CreateReceiveParameters parameters) {
 
-        User receiver = userService.getUserWithGenerateByKeyValue(parameters.getReceiverId());
-
         Optional<SprinkleToken> tokenOptional = sprinkleTokenService.getSprinkleToken(parameters.getToken());
+
         if (tokenOptional.isEmpty())
             throw new BaseException(ErrorStatus.INVALID_SPRINKLE_TOKEN_VALUE);
+
+        User receiver = userService.getUserWithGenerateByKeyValue(parameters.getReceiverId());
 
         SprinkleToken token = tokenOptional.get();
 
