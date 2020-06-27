@@ -7,8 +7,8 @@
     <groupId>devh.homework</groupId>
     <artifactId>sprinklemoney</artifactId>
     <packaging>jar</packaging>
-    <name></name>
-    <version>1.0-SNAPSHOT</version>
+    <name>Sprinkle Money</name>
+    <version>1.0.0</version>
 
 
     <build>
@@ -69,8 +69,6 @@
             <artifactId>mariadb-java-client</artifactId>
         </dependency>
 
-
-        <!-- https://mvnrepository.com/artifact/org.testng/testng -->
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
@@ -106,24 +104,18 @@
                 <version>${version.spring-boot}</version>
             </dependency>
 
-
-            <!-- https://mvnrepository.com/artifact/org.mariadb.jdbc/mariadb-java-client -->
             <dependency>
                 <groupId>org.mariadb.jdbc</groupId>
                 <artifactId>mariadb-java-client</artifactId>
                 <version>${version.mariadb.driver}</version>
             </dependency>
 
-
-            <!-- https://mvnrepository.com/artifact/org.testng/testng -->
             <dependency>
                 <groupId>org.testng</groupId>
                 <artifactId>testng</artifactId>
                 <version>7.0.0</version>
                 <scope>test</scope>
             </dependency>
-
-
 
 
         </dependencies>
