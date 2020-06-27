@@ -73,7 +73,7 @@ public class SprinkleServiceImpl implements SprinkleService {
     @Transactional(readOnly = true)
     public Sprinkle getSprinkleWithReceives(String tokenValue) {
         Optional<Sprinkle> optional = getSprinkle(tokenValue);
-        Sprinkle sprinkle = optional.orElseThrow(() -> new BaseException(ErrorStatus.NOT_EXIST_SPRINKLE));
+        Sprinkle sprinkle = optional.filter(exist-> exist.getCreated().isAfter(LocalDateTime.now().minus(7, ChronoUnit.DAYS))).orElseThrow(() -> new BaseException(ErrorStatus.NOT_EXIST_SPRINKLE));
         List<SprinkleReceive> receiveList = sprinkle.getSprinkleReceives();
         log.error("# List : {}", receiveList);
 
