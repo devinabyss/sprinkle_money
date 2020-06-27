@@ -36,7 +36,7 @@ public class SprinkleController extends BaseController {
         return success(sprinkle.getToken().getValue());
     }
 
-    @PostMapping
+    @GetMapping
     public ResponseEntity<CustomResponse> readSprinkle(@RequestHeader("X-USER-ID") String userId, @RequestHeader("X-ROOM-ID") String roomId, @PathVariable("token") String token) {
 
         return success();
