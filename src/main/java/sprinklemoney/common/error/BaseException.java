@@ -16,6 +16,11 @@ public class BaseException extends RuntimeException {
         this.errorStatus = error;
     }
 
+    public BaseException(ErrorStatus error, String message) {
+        super(message);
+        this.errorStatus = error;
+    }
+
     public static class TokenKeyGenerationFailedException extends BaseException {
         public TokenKeyGenerationFailedException() {
             super(ErrorStatus.SPRINKLE_TOKEN_GENERATION_FAIL);

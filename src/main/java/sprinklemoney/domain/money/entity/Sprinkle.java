@@ -2,6 +2,7 @@ package sprinklemoney.domain.money.entity;
 
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.transaction.annotation.Transactional;
 import sprinklemoney.common.error.BaseException;
 import sprinklemoney.common.error.ErrorStatus;
 import sprinklemoney.domain.user.entity.User;
@@ -13,6 +14,7 @@ import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
 @Getter
@@ -63,42 +65,45 @@ public class Sprinkle {
     }
 
     public boolean isGivableStatus() {
-        log.info("## Sprinkle : {}", this);
-
-        log.info("## Receivies : {}", getSprinkleReceives());
-        boolean isBefore = created.isBefore(LocalDateTime.now().minus(10, ChronoUnit.MINUTES));
-        log.info("## isBefore : {}", isBefore);
-        if (isBefore)
-            return false;
 
         boolean isFullSize = getSprinkleReceives().size() >= divideSize;
-        log.info("## isFullSize : {}", isFullSize);
         if (isFullSize)
             return false;
 
-
-
         boolean isFullAmount = getSprinkleReceives().stream().map(SprinkleReceive::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add).compareTo(sprinkleAmount) > -1;
-        log.info("## isFullAmount : {}", isFullAmount);
         if (isFullAmount)
             return false;
 
         return true;
     }
 
+
     public SprinkleReceive share(User receiver, SecureRandom random, String roomId) {
-        if (getSprinkleReceives().stream().anyMatch(receive -> receive.getReceiver().equals(receiver)))
-            throw new BaseException(ErrorStatus.ALREADY_RECEIVED_SPRINKLE);
+
+        if (created.isBefore(LocalDateTime.now().minus(10, ChronoUnit.MINUTES)))
+            throw new BaseException(ErrorStatus.INVALID_SPRINKLE_STATUS);
 
         if (!this.roomId.equals(roomId))
             throw new BaseException(ErrorStatus.NOT_ELIGIBLE);
 
-        if (!isGivableStatus())
+
+        AtomicReference<BigDecimal> reference = new AtomicReference<>(BigDecimal.ZERO);
+
+        getSprinkleReceives().forEach(receive -> {
+                    reference.set(reference.get().add(receive.getAmount()));
+                    if (receive.getReceiver().equals(receiver))
+                        throw new BaseException(ErrorStatus.ALREADY_RECEIVED_SPRINKLE);
+                }
+        );
+
+        if (reference.get().compareTo(sprinkleAmount) > -1)
             throw new BaseException(ErrorStatus.INVALID_SPRINKLE_STATUS);
 
 
+
+
         int currentDivideSize = divideSize - getSprinkleReceives().size();
-        BigDecimal restAmount = sprinkleAmount.subtract(getSprinkleReceives().stream().map(SprinkleReceive::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add));
+        BigDecimal restAmount = sprinkleAmount.subtract(reference.get());
 
         SprinkleReceive sprinkleReceive = SprinkleReceive.builder()
                 .amount(decisionShareValue(currentDivideSize, restAmount, random))
