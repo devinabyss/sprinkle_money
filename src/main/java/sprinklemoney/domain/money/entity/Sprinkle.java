@@ -3,7 +3,7 @@ package sprinklemoney.domain.money.entity;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import sprinklemoney.common.error.BaseException;
-import sprinklemoney.common.error.ErrorCode;
+import sprinklemoney.common.error.ErrorStatus;
 import sprinklemoney.domain.user.entity.User;
 
 import javax.persistence.*;
@@ -12,7 +12,6 @@ import java.math.RoundingMode;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -31,7 +30,7 @@ public class Sprinkle {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.DETACH)
+    @OneToOne(fetch = FetchType.EAGER)
     private SprinkleToken token;
 
     @OneToMany(fetch = FetchType.LAZY)
@@ -89,13 +88,13 @@ public class Sprinkle {
 
     public SprinkleReceive share(User receiver, SecureRandom random, String roomId) {
         if (getSprinkleReceives().stream().anyMatch(receive -> receive.getReceiver().equals(receiver)))
-            throw new BaseException(ErrorCode.ALREADY_RECEIVED_SPRINKLE);
+            throw new BaseException(ErrorStatus.ALREADY_RECEIVED_SPRINKLE);
 
         if (!this.roomId.equals(roomId))
-            throw new BaseException(ErrorCode.NOT_ELIGIBLE);
+            throw new BaseException(ErrorStatus.NOT_ELIGIBLE);
 
         if (!isGivableStatus())
-            throw new BaseException(ErrorCode.INVALID_SPRINKLE_STATUS);
+            throw new BaseException(ErrorStatus.INVALID_SPRINKLE_STATUS);
 
 
         int currentDivideSize = divideSize - getSprinkleReceives().size();

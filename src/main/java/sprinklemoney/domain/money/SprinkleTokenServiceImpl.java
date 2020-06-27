@@ -1,15 +1,21 @@
 package sprinklemoney.domain.money;
 
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import sprinklemoney.common.error.BaseException;
 import sprinklemoney.domain.common.util.StringHandleUtil;
 import sprinklemoney.domain.money.entity.SprinkleToken;
 import sprinklemoney.domain.money.repository.SprinkleTokenRepository;
 
+import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Service
 public class SprinkleTokenServiceImpl implements SprinkleTokenService {
 
@@ -19,20 +25,6 @@ public class SprinkleTokenServiceImpl implements SprinkleTokenService {
         this.sprinkleTokenRepository = sprinkleTokenRepository;
     }
 
-//    @Override
-//    public Optional<SprinkleToken> getUnlinkedSprinkleToken(String tokenValue, SprinkleToken.Status status) {
-//        return sprinkleTokenRepository.findByValueAndStatus(tokenValue, status);
-//    }
-//
-//    @Override
-//    @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.SERIALIZABLE)
-//    public SprinkleToken getSprinkleTokenWithGenerate(String tokenValue) {
-//
-//
-//
-//
-//        return getUnlinkedSprinkleToken(tokenValue, SprinkleToken.Status.GENERATED).orElseGet(this::generateSprinkleToken);
-//    }
 
     @Override
     public Optional<SprinkleToken> getSprinkleToken(String tokenValue) {
@@ -40,9 +32,10 @@ public class SprinkleTokenServiceImpl implements SprinkleTokenService {
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.SERIALIZABLE)
+    @Retryable(include = {DataIntegrityViolationException.class})
+    @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_COMMITTED)
     public SprinkleToken generateSprinkleToken() {
-        String value = generateSprinkleTokenValue();
+        String value = generateSprinkleTokenValue(10);
 
         SprinkleToken newToken = SprinkleToken.builder().value(value).build();
         sprinkleTokenRepository.save(newToken);
@@ -55,7 +48,26 @@ public class SprinkleTokenServiceImpl implements SprinkleTokenService {
         return sprinkleTokenRepository.save(token);
     }
 
-    private String generateSprinkleTokenValue() {
-        return StringHandleUtil.generateUriSafeRandomString(3);
+    public String generateSprinkleTokenValue(int recursiveTry) {
+
+        if (recursiveTry == 0)
+            throw new BaseException.TokenKeyGenerationFailedException();
+
+        int count = recursiveTry;
+
+        String generated = StringHandleUtil.generateUriSafeRandomString(3);
+
+        log.info("## Generated Sprinkle Token : {}, Try Remain : {}", generated, count);
+
+
+        Optional<SprinkleToken> optionalSprinkleToken = sprinkleTokenRepository.findByValue(generated);
+
+        if (optionalSprinkleToken.isEmpty())
+            return generated;
+
+        if (optionalSprinkleToken.get().getStatus().equals(SprinkleToken.Status.GENERATED))
+            return generated;
+
+        return generateSprinkleTokenValue(--count);
     }
 }

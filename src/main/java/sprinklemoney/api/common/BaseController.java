@@ -14,6 +14,6 @@ public class BaseController {
     }
 
     protected ResponseEntity<CustomResponse> fail(HttpStatus httpStatus, int errorCode, String msg) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(CustomResponse.builder().fail(errorCode, msg));
+        return ResponseEntity.status(httpStatus).body(CustomResponse.builder().fail(errorCode, msg));
     }
 }

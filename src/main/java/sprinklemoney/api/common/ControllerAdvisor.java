@@ -21,13 +21,14 @@ public class ControllerAdvisor extends BaseController {
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<CustomResponse> runtimeException(RuntimeException e) {
         log.warn("## Not Detailed Exception : {}, {}", e.getClass().getCanonicalName(), e.getMessage(), e);
-        return fail(HttpStatus.BAD_REQUEST, 8888, e.getMessage());
+        return fail(HttpStatus.INTERNAL_SERVER_ERROR, 8888, e.getMessage());
     }
 
     @ExceptionHandler(BaseException.class)
     public ResponseEntity<CustomResponse> baseException(BaseException e) {
-        log.info("## Logical Exception : {}, {}", e.getClass().getCanonicalName(), e.getMessage(), e);
-        return fail(HttpStatus.BAD_REQUEST, e.getErrorCode(), e.getMessage());
+        log.info("## Known Exception : {}, {}", e.getErrorStatus(), e.getMessage(), e);
+        log.info("## {}", e.getErrorStatus().getHttpStatus());
+        return fail(e.getErrorStatus().getHttpStatus(), e.getErrorStatus().getErrorCode(), e.getMessage());
     }
 
 }
