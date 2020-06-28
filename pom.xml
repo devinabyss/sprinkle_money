@@ -8,7 +8,7 @@
     <artifactId>sprinklemoney</artifactId>
     <packaging>jar</packaging>
     <name>Sprinkle Money</name>
-    <version>1.0.3</version>
+    <version>1.1.0</version>
 
 
     <build>
@@ -38,6 +38,7 @@
         <version.spring>5.2.7.RELEASE</version.spring>
         <version.hibernate>5.4.17.Final</version.hibernate>
         <version.mariadb.driver>2.6.1</version.mariadb.driver>
+        <version.apache-commons-lang>3.10</version.apache-commons-lang>
     </properties>
 
 
@@ -80,6 +81,12 @@
             <artifactId>testng</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
+
 
     </dependencies>
 
@@ -141,6 +148,12 @@
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-context</artifactId>
                 <version>${version.spring}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>${version.apache-commons-lang}</version>
             </dependency>
 
         </dependencies>

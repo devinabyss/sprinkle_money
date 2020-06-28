@@ -1,10 +1,10 @@
 package sprinklemoney.api.dto;
 
-import com.sun.istack.NotNull;
 import lombok.Data;
 
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 
 @Data

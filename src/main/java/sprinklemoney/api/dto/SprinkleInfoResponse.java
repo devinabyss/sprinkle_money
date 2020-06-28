@@ -18,10 +18,12 @@ public class SprinkleInfoResponse {
     private final List<SprinkleReceiveInfoResponse> receives;
 
     @Builder
-    public SprinkleInfoResponse(Sprinkle sprinkle){
+    public SprinkleInfoResponse(Sprinkle sprinkle) {
         this.created = sprinkle.getCreated();
         this.initialAmount = sprinkle.getSprinkleAmount();
-        this.receives = sprinkle.getSprinkleReceives().stream().map(SprinkleReceiveInfoResponse::new).collect(Collectors.toList());
-        this.sprinkledAmount = receives.stream().map(SprinkleReceiveInfoResponse::getReceivedAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+        this.receives = sprinkle.getReceives().stream()
+                .map(SprinkleReceiveInfoResponse::new).collect(Collectors.toList());
+        this.sprinkledAmount = receives.stream()
+                .map(SprinkleReceiveInfoResponse::getReceivedAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }

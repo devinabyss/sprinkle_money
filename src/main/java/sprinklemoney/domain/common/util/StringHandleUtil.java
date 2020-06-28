@@ -21,7 +21,7 @@ public class StringHandleUtil {
     private static int mapRandomNumberToAsciiCode(int number) {
 
         if (number < 1 || number > 56)
-            throw new BaseException(ErrorStatus.INVALID_INTERNAL_LOGIC_PARAMETER, "토큰 생성 중 잘못된 숫자가 사용되어 적절한 AsciiCode 로 전환할 수 없음. 숫자 : " + number);
+            throw BaseException.builder().error(ErrorStatus.INVALID_INTERNAL_LOGIC_PARAMETER).message("토큰 생성 중 잘못된 숫자가 사용되어 적절한 AsciiCode 로 전환할 수 없음. 숫자 : " + number).build();
 
         if (number < 27) return number + 64;
 
