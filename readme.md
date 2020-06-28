@@ -12,7 +12,7 @@
 }
 ```
 - response body
-```json
+```javascript
 {
     "header": {
         "resultCode": 0, // 요청 성공 여부
