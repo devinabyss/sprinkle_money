@@ -27,7 +27,7 @@
 - uri : `/sprinkle/{{tokenValue}}`
 - method : `GET`
 - response body
-```json
+```javascript
 {
     "header": {
         "resultCode": 0,
@@ -56,7 +56,7 @@
 ```
 
 ### 뿌리기 분배 받기
-- uri : `/sprinkle/{{tokenValue}}`
+- uri : `/sprinkle/{{tokenValue}}/receive`
 - method : `POST`
 - request body = empty
 - response body
