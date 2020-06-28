@@ -14,11 +14,11 @@ public class SprinkleToken {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String value;
 
     @Setter
-    @Column
+    @Column(nullable = false)
     private Status status;
 
     @Builder

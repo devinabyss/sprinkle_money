@@ -2,7 +2,7 @@ package sprinklemoney.api.dto;
 
 import lombok.Builder;
 import lombok.Getter;
-import sprinklemoney.domain.money.entity.SprinkleReceive;
+import sprinklemoney.domain.money.entity.DistributionReceive;
 
 import java.math.BigDecimal;
 
@@ -12,8 +12,8 @@ public class SprinkleReceiveInfoResponse {
     private final String receiver;
 
     @Builder
-    public SprinkleReceiveInfoResponse(SprinkleReceive sprinkleReceive) {
-        this.receivedAmount = sprinkleReceive.getAmount();
-        this.receiver = sprinkleReceive.getReceiver().getKeyValue();
+    public SprinkleReceiveInfoResponse(DistributionReceive receive) {
+        this.receivedAmount = receive.getDistribution().getAmount();
+        this.receiver = receive.getReceiver().getKeyValue();
     }
 }

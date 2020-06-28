@@ -10,7 +10,9 @@ public class CustomResponse {
     private Header header;
     private Object result;
 
-    public static Builder builder(){return new Builder();}
+    public static Builder builder() {
+        return new Builder();
+    }
 
     @NoArgsConstructor(access = AccessLevel.PRIVATE)
     public static final class Builder {
@@ -30,7 +32,6 @@ public class CustomResponse {
         }
 
     }
-
 
 
     @Getter

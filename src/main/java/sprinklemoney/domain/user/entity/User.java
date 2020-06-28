@@ -21,7 +21,7 @@ public class User {
     private String keyValue;
 
     @Builder
-    public User (String keyValue){
+    public User(String keyValue) {
         this.keyValue = keyValue;
     }
 

@@ -2,9 +2,9 @@ package sprinklemoney.domain.money.entity;
 
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.transaction.annotation.Transactional;
 import sprinklemoney.common.error.BaseException;
 import sprinklemoney.common.error.ErrorStatus;
+import sprinklemoney.domain.money.SprinkleDistributionService;
 import sprinklemoney.domain.user.entity.User;
 
 import javax.persistence.*;
@@ -13,6 +13,7 @@ import java.math.RoundingMode;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -24,7 +25,7 @@ import java.util.concurrent.atomic.AtomicReference;
                 @Index(name = "token", unique = true, columnList = "token_id"),
                 @Index(name = "author", unique = false, columnList = "author_id")
         })
-@ToString
+@ToString(exclude = "sprinkleReceives")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Sprinkle {
 
@@ -32,26 +33,35 @@ public class Sprinkle {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(fetch = FetchType.EAGER)
+    @OneToOne(fetch = FetchType.EAGER, optional = false)
     private SprinkleToken token;
 
+    @Setter
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "sprinkle_id")
+    @Deprecated
     private List<SprinkleReceive> sprinkleReceives;
 
-    @Column
+
+    @Setter
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(name = "sprinkle_id")
+    private List<DistributionReceive> receives;
+
+    @Column(nullable = false)
     private BigDecimal sprinkleAmount;
 
-    @Column
+
+    @Column(nullable = false)
     private int divideSize;
 
     @OneToOne
     private User author;
 
-    @Column
+    @Column(nullable = false)
     private String roomId;
 
-    @Column
+    @Column(nullable = false)
     private LocalDateTime created;
 
     @Builder
@@ -64,21 +74,32 @@ public class Sprinkle {
         this.created = LocalDateTime.now();
     }
 
-    public boolean isGivableStatus() {
+    public void checkAcceptableConditionToDistribute(SprinkleDistributionService distributionService, User receiver, String requestedRoomId) {
+        if (this.created.isBefore(LocalDateTime.now().minus(10, ChronoUnit.MINUTES)))
+            throw new BaseException(ErrorStatus.INVALID_SPRINKLE_STATUS);
 
-        boolean isFullSize = getSprinkleReceives().size() >= divideSize;
-        if (isFullSize)
-            return false;
+        if (receiver.equals(author) || !requestedRoomId.equals(getRoomId()))
+            throw new BaseException(ErrorStatus.NOT_ELIGIBLE);
 
-        boolean isFullAmount = getSprinkleReceives().stream().map(SprinkleReceive::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add).compareTo(sprinkleAmount) > -1;
-        if (isFullAmount)
-            return false;
+        if (distributionService.findReceivedHistory(this, receiver).isPresent())
+            throw new BaseException(ErrorStatus.ALREADY_RECEIVED_SPRINKLE);
+    }
 
-        return true;
+    public DistributionReceive distributeToReceiver(SprinkleDistributionService service, User receiver, String requestedRoomId) {
+        checkAcceptableConditionToDistribute(service, receiver, requestedRoomId);
+
+        SprinkleDistribution targetDistribution = service.getAvailableDistribution(this).orElseThrow(() -> new BaseException(ErrorStatus.INVALID_SPRINKLE_STATUS));
+
+        return service.saveDistributionReceive(DistributionReceive.builder().sprinkle(this).distribution(targetDistribution).receiver(receiver).build());
     }
 
 
-    public SprinkleReceive share(User receiver, SecureRandom random, String roomId) {
+
+
+
+
+
+    public SprinkleReceive shareLogicWhenReceiveRequested(User receiver, SecureRandom random, String roomId) {
 
         if (created.isBefore(LocalDateTime.now().minus(10, ChronoUnit.MINUTES)))
             throw new BaseException(ErrorStatus.INVALID_SPRINKLE_STATUS);
@@ -100,8 +121,6 @@ public class Sprinkle {
             throw new BaseException(ErrorStatus.INVALID_SPRINKLE_STATUS);
 
 
-
-
         int currentDivideSize = divideSize - getSprinkleReceives().size();
         BigDecimal restAmount = sprinkleAmount.subtract(reference.get());
 
@@ -114,6 +133,36 @@ public class Sprinkle {
         return sprinkleReceive;
     }
 
+    public List<SprinkleReceive> shareLogicWhenSprinkleCreated(SecureRandom random) {
+
+        AtomicReference<BigDecimal> reference = new AtomicReference<BigDecimal>(sprinkleAmount);
+
+        List<SprinkleReceive> receives = new ArrayList<>();
+
+        for (int i = divideSize; i > 0; i--) {
+            BigDecimal currentShare = decisionShareValue(i, reference.get(), random);
+            reference.set(reference.get().subtract(currentShare));
+            receives.add(SprinkleReceive.builder().sprinkle(this).amount(currentShare).build());
+        }
+
+        return receives;
+    }
+
+    public List<SprinkleDistribution> distributeWhenSprinkleCreated(SecureRandom random) {
+        AtomicReference<BigDecimal> reference = new AtomicReference<BigDecimal>(sprinkleAmount);
+
+        List<SprinkleDistribution> distributions = new ArrayList<>();
+
+        for (int i = divideSize; i > 0; i--) {
+            BigDecimal currentShare = decisionShareValue(i, reference.get(), random);
+            reference.set(reference.get().subtract(currentShare));
+            distributions.add(SprinkleDistribution.builder().sprinkle(this).amount(currentShare).build());
+        }
+
+        return distributions;
+
+    }
+
     private BigDecimal decisionShareValue(int restShareSize, BigDecimal restAmount, SecureRandom random) {
         if (restShareSize == 1)
             return restAmount;
@@ -122,5 +171,6 @@ public class Sprinkle {
 
         return restAmount.multiply(percent).setScale(0, RoundingMode.HALF_UP);
     }
+
 
 }

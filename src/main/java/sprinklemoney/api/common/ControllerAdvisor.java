@@ -2,12 +2,15 @@ package sprinklemoney.api.common;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.CannotAcquireLockException;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import sprinklemoney.common.error.BaseException;
 import sprinklemoney.common.error.ErrorStatus;
+
+import javax.validation.ConstraintViolationException;
 
 @Slf4j
 @RestControllerAdvice
@@ -25,6 +28,13 @@ public class ControllerAdvisor extends BaseController {
         ErrorStatus errorStatus = ErrorStatus.UNKNOWN;
         log.error("## Not Detailed Exception : {}, {}, {}", errorStatus, e.getClass().getCanonicalName(), e.getMessage(), e);
         return fail(errorStatus.getHttpStatus(), 9998, errorStatus.getMessage());
+    }
+
+    @ExceptionHandler({ConstraintViolationException.class, MethodArgumentNotValidException.class, HttpRequestMethodNotSupportedException.class})
+    public ResponseEntity<CustomResponse> validation(Exception e) {
+        ErrorStatus errorStatus = ErrorStatus.HTTP_REQUEST_VALIDATION_FAILED;
+        log.debug("## Request Validation Failed. : {}, {}, {}", errorStatus, e.getClass().getCanonicalName(), e.getMessage(), e);
+        return fail(errorStatus.getHttpStatus(), errorStatus.getErrorCode(), errorStatus.getMessage());
     }
 
     @ExceptionHandler(CannotAcquireLockException.class)
