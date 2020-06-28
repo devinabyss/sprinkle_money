@@ -5,7 +5,7 @@
 - uri : `/sprinkle`
 - method : `POST`
 - request body
-```json
+```javascript
 {
     "divideSize" : 10000, // 나눌 갯수
     "amount" : 5000000000 // 나눌 총액
@@ -60,7 +60,7 @@
 - method : `POST`
 - request body = empty
 - response body
-```json
+```javascript
 {
     "header": {
         "resultCode": 0,
