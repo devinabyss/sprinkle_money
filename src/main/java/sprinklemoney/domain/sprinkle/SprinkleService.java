@@ -1,4 +1,4 @@
-package sprinklemoney.domain.money;
+package sprinklemoney.domain.sprinkle;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -9,16 +9,15 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import sprinklemoney.common.error.BaseException;
 import sprinklemoney.common.error.ErrorStatus;
-import sprinklemoney.domain.money.dto.CreateReceiveParameters;
-import sprinklemoney.domain.money.dto.CreateSprinkleParameters;
-import sprinklemoney.domain.money.dto.GetSprinkleParameters;
-import sprinklemoney.domain.money.entity.DistributionReceive;
-import sprinklemoney.domain.money.entity.Sprinkle;
-import sprinklemoney.domain.money.entity.SprinkleReceive;
-import sprinklemoney.domain.money.entity.SprinkleToken;
-import sprinklemoney.domain.money.repository.SprinkleRepository;
-import sprinklemoney.domain.user.UserService;
+import sprinklemoney.domain.sprinkle.dto.CreateReceiveParameters;
+import sprinklemoney.domain.sprinkle.dto.CreateSprinkleParameters;
+import sprinklemoney.domain.sprinkle.dto.GetSprinkleParameters;
+import sprinklemoney.domain.sprinkle.entity.DistributionReceive;
+import sprinklemoney.domain.sprinkle.entity.Sprinkle;
+import sprinklemoney.domain.sprinkle.entity.SprinkleToken;
+import sprinklemoney.domain.sprinkle.repository.SprinkleRepository;
 import sprinklemoney.domain.user.entity.User;
+import sprinklemoney.domain.user.service.UserService;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
@@ -39,12 +38,6 @@ public class SprinkleService {
 
     @Autowired
     private SprinkleRepository sprinkleRepository;
-
-//    @Autowired
-//    private SprinkleReceiveRepository sprinkleReceiveRepository;
-
-    @Autowired
-    private SprinkleReceiveService sprinkleReceiveService;
 
     @Autowired
     private SprinkleDistributionService distributionService;
@@ -72,7 +65,7 @@ public class SprinkleService {
 
         sprinkleTokenService.saveSprinkleToken(token);
 
-        sprinkle.distributeWhenSprinkleCreated(secureRandom).forEach(sprinkleDistribution -> distributionService.saveDistribution(sprinkleDistribution));
+        sprinkle.generateDistribution(secureRandom).forEach(sprinkleDistribution -> distributionService.saveDistribution(sprinkleDistribution));
 
         return sprinkleRepository.save(sprinkle);
     }
@@ -109,72 +102,11 @@ public class SprinkleService {
 
         SprinkleToken token = sprinkleTokenService.getSprinkleToken(parameters.getToken()).orElseThrow(() -> new BaseException(ErrorStatus.INVALID_SPRINKLE_TOKEN_VALUE));
 
-        User receiver = userService.getUserWithGenerateByKeyValue(parameters.getReceiverId());
-
         Sprinkle sprinkle = sprinkleRepository.findByToken(token).orElseThrow(() -> new BaseException(ErrorStatus.NOT_EXIST_SPRINKLE));
 
-        return sprinkle.distributeToReceiver(distributionService, receiver, parameters.getRoomId());
-    }
-
-
-    @Deprecated
-    @Transactional
-    public SprinkleReceive assignReceive(CreateReceiveParameters parameters) {
-
-        SprinkleToken token = sprinkleTokenService.getSprinkleToken(parameters.getToken()).orElseThrow(() -> new BaseException(ErrorStatus.INVALID_SPRINKLE_TOKEN_VALUE));
-
         User receiver = userService.getUserWithGenerateByKeyValue(parameters.getReceiverId());
 
-        Optional<Sprinkle> sprinkleOptional = sprinkleRepository.findByToken(token);
-
-        if (sprinkleOptional.isEmpty())
-            throw new BaseException(ErrorStatus.NOT_EXIST_SPRINKLE);
-
-        Sprinkle sprinkle = sprinkleOptional.get();
-
-        if (!parameters.getRoomId().equals(sprinkle.getRoomId()))
-            throw new BaseException(ErrorStatus.NOT_ELIGIBLE);
-
-        if (sprinkleReceiveService.getBySprinkleAndReceiver(sprinkle, receiver).isPresent())
-            throw new BaseException(ErrorStatus.ALREADY_RECEIVED_SPRINKLE);
-
-        SprinkleReceive receive = sprinkleReceiveService.getFirstBySprinkleAndReceiverIsNullOrderById(sprinkle)
-                .orElseThrow(() -> new BaseException(ErrorStatus.INVALID_SPRINKLE_STATUS));
-
-        log.info("## Receive: {}", receive);
-
-//        if (sprinkleReceiveService.getBySprinkleAndReceiver(sprinkle, receiver).isPresent())
-//            throw new BaseException(ErrorStatus.ALREADY_RECEIVED_SPRINKLE);
-        log.info("###### before set");
-        receive.setReceiver(receiver);
-
-
-        return receive;//sprinkleReceiveService.assignSprinkleReceive(receive);
+        return distributionService.saveDistributionReceive(sprinkle.distributeToReceiver(distributionService, receiver, parameters.getRoomId()));
     }
 
-
-    @Deprecated
-    @Transactional(isolation = Isolation.SERIALIZABLE)
-    public SprinkleReceive createReceive(CreateReceiveParameters parameters) {
-
-        Optional<SprinkleToken> tokenOptional = sprinkleTokenService.getSprinkleToken(parameters.getToken());
-
-        if (tokenOptional.isEmpty())
-            throw new BaseException(ErrorStatus.INVALID_SPRINKLE_TOKEN_VALUE);
-
-        User receiver = userService.getUserWithGenerateByKeyValue(parameters.getReceiverId());
-
-        SprinkleToken token = tokenOptional.get();
-
-        Optional<Sprinkle> sprinkleOptional = sprinkleRepository.findByToken(token);
-
-        if (sprinkleOptional.isEmpty())
-            throw new BaseException(ErrorStatus.NOT_EXIST_SPRINKLE);
-
-        Sprinkle sprinkle = sprinkleOptional.get();
-
-        SprinkleReceive sprinkleReceive = sprinkle.shareLogicWhenReceiveRequested(receiver, secureRandom, parameters.getRoomId());
-
-        return sprinkleReceiveService.saveSprinkleReceive(sprinkleReceive);
-    }
 }

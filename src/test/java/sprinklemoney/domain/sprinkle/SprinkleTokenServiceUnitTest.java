@@ -1,4 +1,4 @@
-package sprinklemoney.domain.money;
+package sprinklemoney.domain.sprinkle;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
@@ -8,23 +8,23 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import sprinklemoney.domain.common.util.StringHandleUtil;
-import sprinklemoney.domain.money.entity.SprinkleToken;
-import sprinklemoney.domain.money.repository.SprinkleTokenRepository;
+import sprinklemoney.domain.sprinkle.entity.SprinkleToken;
+import sprinklemoney.domain.sprinkle.repository.SprinkleTokenRepository;
 
 import java.util.Optional;
 
 @Slf4j
 @RunWith(MockitoJUnitRunner.class)
-public class SprinkleTokenServiceImplUnitTest {
+public class SprinkleTokenServiceUnitTest {
 
     private SprinkleTokenRepository sprinkleTokenRepository;
 
-    private SprinkleTokenServiceImpl service;
+    private SprinkleTokenService service;
 
     @Before
     public void init() {
         sprinkleTokenRepository = Mockito.mock(SprinkleTokenRepository.class);
-        service = Mockito.spy(new SprinkleTokenServiceImpl(sprinkleTokenRepository));
+        service = Mockito.spy(new SprinkleTokenService(sprinkleTokenRepository));
     }
 
     @Test
