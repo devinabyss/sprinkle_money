@@ -1,4 +1,4 @@
-package sprinklemoney.domain.money.dto;
+package sprinklemoney.domain.sprinkle.dto;
 
 import lombok.Builder;
 import lombok.Getter;

@@ -1,4 +1,4 @@
-package sprinklemoney.domain.money;
+package sprinklemoney.domain.sprinkle;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,11 +7,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import sprinklemoney.common.error.BaseException;
-import sprinklemoney.domain.money.entity.DistributionReceive;
-import sprinklemoney.domain.money.entity.Sprinkle;
-import sprinklemoney.domain.money.entity.SprinkleDistribution;
-import sprinklemoney.domain.money.repository.DistributionReceiveRepository;
-import sprinklemoney.domain.money.repository.SprinkleDistributionRepository;
+import sprinklemoney.domain.sprinkle.entity.DistributionReceive;
+import sprinklemoney.domain.sprinkle.entity.Sprinkle;
+import sprinklemoney.domain.sprinkle.entity.SprinkleDistribution;
+import sprinklemoney.domain.sprinkle.repository.DistributionReceiveRepository;
+import sprinklemoney.domain.sprinkle.repository.SprinkleDistributionRepository;
 import sprinklemoney.domain.user.entity.User;
 
 import java.util.List;

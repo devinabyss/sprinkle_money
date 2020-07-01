@@ -5,8 +5,8 @@ import lombok.Getter;
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
-import sprinklemoney.domain.money.entity.Sprinkle;
-import sprinklemoney.domain.money.entity.SprinkleDistribution;
+import sprinklemoney.domain.sprinkle.entity.Sprinkle;
+import sprinklemoney.domain.sprinkle.entity.SprinkleDistribution;
 
 @Getter
 public class BaseException extends NestedRuntimeException {

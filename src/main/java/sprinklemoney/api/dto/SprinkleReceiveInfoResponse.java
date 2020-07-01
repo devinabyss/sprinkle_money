@@ -2,7 +2,7 @@ package sprinklemoney.api.dto;
 
 import lombok.Builder;
 import lombok.Getter;
-import sprinklemoney.domain.money.entity.DistributionReceive;
+import sprinklemoney.domain.sprinkle.entity.DistributionReceive;
 
 import java.math.BigDecimal;
 

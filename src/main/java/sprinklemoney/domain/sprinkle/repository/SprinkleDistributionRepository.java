@@ -1,11 +1,11 @@
-package sprinklemoney.domain.money.repository;
+package sprinklemoney.domain.sprinkle.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import sprinklemoney.domain.money.entity.Sprinkle;
-import sprinklemoney.domain.money.entity.SprinkleDistribution;
+import sprinklemoney.domain.sprinkle.entity.Sprinkle;
+import sprinklemoney.domain.sprinkle.entity.SprinkleDistribution;
 
 import java.util.Optional;
 
