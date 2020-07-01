@@ -1,9 +1,9 @@
-package sprinklemoney.domain.money.repository;
+package sprinklemoney.domain.sprinkle.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import sprinklemoney.domain.money.entity.Sprinkle;
-import sprinklemoney.domain.money.entity.SprinkleToken;
+import sprinklemoney.domain.sprinkle.entity.Sprinkle;
+import sprinklemoney.domain.sprinkle.entity.SprinkleToken;
 import sprinklemoney.domain.user.entity.User;
 
 import java.time.LocalDateTime;

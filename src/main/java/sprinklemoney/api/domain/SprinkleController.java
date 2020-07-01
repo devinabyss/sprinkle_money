@@ -8,12 +8,12 @@ import sprinklemoney.api.common.BaseController;
 import sprinklemoney.api.common.CustomResponse;
 import sprinklemoney.api.dto.CreateSprinkleRequest;
 import sprinklemoney.api.dto.SprinkleInfoResponse;
-import sprinklemoney.domain.money.SprinkleService;
-import sprinklemoney.domain.money.dto.CreateReceiveParameters;
-import sprinklemoney.domain.money.dto.CreateSprinkleParameters;
-import sprinklemoney.domain.money.dto.GetSprinkleParameters;
-import sprinklemoney.domain.money.entity.DistributionReceive;
-import sprinklemoney.domain.money.entity.Sprinkle;
+import sprinklemoney.domain.sprinkle.SprinkleService;
+import sprinklemoney.domain.sprinkle.dto.CreateReceiveParameters;
+import sprinklemoney.domain.sprinkle.dto.CreateSprinkleParameters;
+import sprinklemoney.domain.sprinkle.dto.GetSprinkleParameters;
+import sprinklemoney.domain.sprinkle.entity.DistributionReceive;
+import sprinklemoney.domain.sprinkle.entity.Sprinkle;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;

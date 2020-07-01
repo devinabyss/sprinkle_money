@@ -1,9 +1,9 @@
-package sprinklemoney.domain.money.repository;
+package sprinklemoney.domain.sprinkle.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import sprinklemoney.domain.money.entity.DistributionReceive;
-import sprinklemoney.domain.money.entity.Sprinkle;
+import sprinklemoney.domain.sprinkle.entity.DistributionReceive;
+import sprinklemoney.domain.sprinkle.entity.Sprinkle;
 import sprinklemoney.domain.user.entity.User;
 
 import java.util.List;

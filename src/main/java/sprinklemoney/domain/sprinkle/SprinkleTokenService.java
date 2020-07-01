@@ -1,4 +1,4 @@
-package sprinklemoney.domain.money;
+package sprinklemoney.domain.sprinkle;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -9,28 +9,25 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import sprinklemoney.common.error.BaseException;
 import sprinklemoney.domain.common.util.StringHandleUtil;
-import sprinklemoney.domain.money.entity.SprinkleToken;
-import sprinklemoney.domain.money.repository.SprinkleTokenRepository;
+import sprinklemoney.domain.sprinkle.entity.SprinkleToken;
+import sprinklemoney.domain.sprinkle.repository.SprinkleTokenRepository;
 
 import java.util.Optional;
 
 @Slf4j
 @Service
-public class SprinkleTokenServiceImpl implements SprinkleTokenService {
+public class SprinkleTokenService {
 
     private final SprinkleTokenRepository sprinkleTokenRepository;
 
-    public SprinkleTokenServiceImpl(SprinkleTokenRepository sprinkleTokenRepository) {
+    public SprinkleTokenService(SprinkleTokenRepository sprinkleTokenRepository) {
         this.sprinkleTokenRepository = sprinkleTokenRepository;
     }
 
-
-    @Override
     public Optional<SprinkleToken> getSprinkleToken(String tokenValue) {
         return sprinkleTokenRepository.findByValue(tokenValue);
     }
 
-    @Override
     @Retryable(include = {DataIntegrityViolationException.class})
     @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_COMMITTED)
     public SprinkleToken generateSprinkleToken() {
@@ -42,7 +39,6 @@ public class SprinkleTokenServiceImpl implements SprinkleTokenService {
         return newToken;
     }
 
-    @Override
     public SprinkleToken saveSprinkleToken(SprinkleToken token) {
         return sprinkleTokenRepository.save(token);
     }
@@ -58,13 +54,9 @@ public class SprinkleTokenServiceImpl implements SprinkleTokenService {
 
         log.info("## Generated Sprinkle Token : {}, Try Remain : {}", generated, count);
 
-
         Optional<SprinkleToken> optionalSprinkleToken = sprinkleTokenRepository.findByValue(generated);
 
-        if (optionalSprinkleToken.isEmpty())
-            return generated;
-
-        if (optionalSprinkleToken.get().getStatus().equals(SprinkleToken.Status.GENERATED))
+        if (optionalSprinkleToken.isEmpty() || optionalSprinkleToken.get().getStatus().equals(SprinkleToken.Status.GENERATED))
             return generated;
 
         return generateSprinkleTokenValue(--count);

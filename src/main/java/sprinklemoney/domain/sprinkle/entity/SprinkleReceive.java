@@ -1,4 +1,4 @@
-package sprinklemoney.domain.money.entity;
+package sprinklemoney.domain.sprinkle.entity;
 
 import lombok.*;
 import sprinklemoney.domain.user.entity.User;
