@@ -35,7 +35,7 @@
         <version.spring-boot>${parent.version}</version.spring-boot>
         <version.spring-retry>1.3.0</version.spring-retry>
         <version.lombok>1.18.12</version.lombok>
-        <version.spring>5.2.7.RELEASE</version.spring>
+        <version.spring>5.2.22.RELEASE</version.spring>
         <version.hibernate>5.4.17.Final</version.hibernate>
         <version.mariadb.driver>2.6.1</version.mariadb.driver>
         <version.apache-commons-lang>3.10</version.apache-commons-lang>
